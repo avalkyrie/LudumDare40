@@ -1,7 +1,7 @@
 // Copyright 1998-2017 Epic Games, Inc. All Rights Reserved.
 
-#include "CatAirBalloon.h"
 #include "CatAirBalloonPawn.h"
+#include "CatAirBalloon.h"
 #include "UObject/ConstructorHelpers.h"
 #include "Camera/CameraComponent.h"
 #include "Components/StaticMeshComponent.h"
@@ -12,6 +12,8 @@
 
 ACatAirBalloonPawn::ACatAirBalloonPawn()
 {
+
+	/*
 	// Structure to hold one-time initialization
 	struct FConstructorStatics
 	{
@@ -27,6 +29,7 @@ ACatAirBalloonPawn::ACatAirBalloonPawn()
 	PlaneMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("PlaneMesh0"));
 	PlaneMesh->SetStaticMesh(ConstructorStatics.PlaneMesh.Get());	// Set static mesh
 	RootComponent = PlaneMesh;
+	*/
 
 	// Create a spring arm component
 	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm0"));
