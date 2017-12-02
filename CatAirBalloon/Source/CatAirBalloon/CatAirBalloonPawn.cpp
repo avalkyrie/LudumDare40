@@ -1,5 +1,6 @@
 // Copyright 1998-2017 Epic Games, Inc. All Rights Reserved.
 
+#include "CatAirBalloon.h"
 #include "CatAirBalloonPawn.h"
 #include "UObject/ConstructorHelpers.h"
 #include "Camera/CameraComponent.h"
@@ -45,12 +46,25 @@ ACatAirBalloonPawn::ACatAirBalloonPawn()
 	TurnSpeed = 50.f;
 	MaxSpeed = 4000.f;
 	MinSpeed = 500.f;
-	CurrentForwardSpeed = 500.f;
+	CurrentForwardSpeed = 1000.f;
+
+	// UI
+	HP = 5;
+	MaxHP = 5;
+	CatCount = 0;
+	GoldCount = 10000;
+	MaxHotAir = 100;
+	HotAir = MaxHotAir;
+	DistanceTravelled = 0;
+
 }
 
 void ACatAirBalloonPawn::Tick(float DeltaSeconds)
 {
-	const FVector LocalMove = FVector(CurrentForwardSpeed * DeltaSeconds, 0.f, 0.f);
+	// Descend at a calculated rate and move forward at a constant rate
+	float DescentSpeed = (MaxHotAir - HotAir) * 10.0f + CatCount * 10.0f + GoldCount * 0.1f;
+
+	const FVector LocalMove = FVector(CurrentForwardSpeed * DeltaSeconds, 0.f, -DescentSpeed * DeltaSeconds);
 
 	// Move plan forwards (with sweep so we stop when we collide with things)
 	AddActorLocalOffset(LocalMove, true);
@@ -74,7 +88,7 @@ void ACatAirBalloonPawn::NotifyHit(class UPrimitiveComponent* MyComp, class AAct
 
 	// Deflect along the surface when we collide.
 	FRotator CurrentRotation = GetActorRotation();
-	SetActorRotation(FQuat::Slerp(CurrentRotation.Quaternion(), HitNormal.ToOrientationQuat(), 0.025f));
+	//SetActorRotation(FQuat::Slerp(CurrentRotation.Quaternion(), HitNormal.ToOrientationQuat(), 0.025f));
 }
 
 
@@ -84,25 +98,46 @@ void ACatAirBalloonPawn::SetupPlayerInputComponent(class UInputComponent* Player
 	check(PlayerInputComponent);
 
 	// Bind our control axis' to callback functions
-	PlayerInputComponent->BindAxis("Thrust", this, &ACatAirBalloonPawn::ThrustInput);
-	PlayerInputComponent->BindAxis("MoveUp", this, &ACatAirBalloonPawn::MoveUpInput);
+	PlayerInputComponent->BindAction("GoUp", EInputEvent::IE_Pressed, this, &ACatAirBalloonPawn::MoveUpInput);
+	PlayerInputComponent->BindAction("GoDown", EInputEvent::IE_Pressed, this, &ACatAirBalloonPawn::MoveDownInput);
+
 	PlayerInputComponent->BindAxis("MoveRight", this, &ACatAirBalloonPawn::MoveRightInput);
 }
 
-void ACatAirBalloonPawn::ThrustInput(float Val)
+void ACatAirBalloonPawn::MoveUpInput()
 {
-	// Is there any input?
-	bool bHasInput = !FMath::IsNearlyEqual(Val, 0.f);
-	// If input is not held down, reduce speed
-	float CurrentAcc = bHasInput ? (Val * Acceleration) : (-0.5f * Acceleration);
-	// Calculate new speed
-	float NewForwardSpeed = CurrentForwardSpeed + (GetWorld()->GetDeltaSeconds() * CurrentAcc);
-	// Clamp between MinSpeed and MaxSpeed
-	CurrentForwardSpeed = FMath::Clamp(NewForwardSpeed, MinSpeed, MaxSpeed);
+	// Jettison baggage to be lighter and go up
+	if (GoldCount > 0) {
+		GoldCount -= 10;
+
+		if (GoldCount < 0) {
+			GoldCount = 0;
+		}
+	}
+	else if (CatCount > 0) {
+		CatCount--;
+	}
+	else {
+		// End game with captain jump out
+		// TODO: End game
+	}
+
+	print("Move Up");
 }
 
-void ACatAirBalloonPawn::MoveUpInput(float Val)
+void ACatAirBalloonPawn::MoveDownInput()
 {
+	// Jettison Hot air to be less buoyant and go down
+	if (HotAir > 0) {
+		HotAir--;
+	}
+
+	if (HotAir == 0) {
+		// No Air left, accelerate to terminal velocity
+		// TODO: End game
+	}
+
+	/*
 	// Target pitch speed is based in input
 	float TargetPitchSpeed = (Val * TurnSpeed * -1.f);
 
@@ -111,6 +146,10 @@ void ACatAirBalloonPawn::MoveUpInput(float Val)
 
 	// Smoothly interpolate to target pitch speed
 	CurrentPitchSpeed = FMath::FInterpTo(CurrentPitchSpeed, TargetPitchSpeed, GetWorld()->GetDeltaSeconds(), 2.f);
+	*/
+
+	print("Move Down");
+
 }
 
 void ACatAirBalloonPawn::MoveRightInput(float Val)

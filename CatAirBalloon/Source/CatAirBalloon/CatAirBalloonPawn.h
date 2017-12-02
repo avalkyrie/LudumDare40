@@ -34,14 +34,11 @@ protected:
 	// Begin APawn overrides
 	virtual void SetupPlayerInputComponent(class UInputComponent* InputComponent) override; // Allows binding actions/axes to functions
 	// End APawn overrides
-
-	/** Bound to the thrust axis */
-	void ThrustInput(float Val);
 	
-	/** Bound to the vertical axis */
-	void MoveUpInput(float Val);
+	void MoveUpInput();
 
-	/** Bound to the horizontal axis */
+	void MoveDownInput();
+
 	void MoveRightInput(float Val);
 
 private:
@@ -75,6 +72,22 @@ private:
 	float CurrentRollSpeed;
 
 public:
+
+	int HP;
+	int MaxHP;
+
+	// Heavy things
+	int CatCount;
+	int GoldCount;
+
+	// Light things
+	float MaxHotAir;
+	float HotAir;
+
+	float DistanceTravelled;
+
+
+
 	/** Returns PlaneMesh subobject **/
 	FORCEINLINE class UStaticMeshComponent* GetPlaneMesh() const { return PlaneMesh; }
 	/** Returns SpringArm subobject **/
