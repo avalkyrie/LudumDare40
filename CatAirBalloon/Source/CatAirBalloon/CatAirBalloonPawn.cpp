@@ -4,6 +4,7 @@
 #include "CatAirBalloon.h"
 #include "UObject/ConstructorHelpers.h"
 #include "Camera/CameraComponent.h"
+#include "Components/BoxComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Components/InputComponent.h"
 #include "GameFramework/SpringArmComponent.h"
@@ -31,6 +32,11 @@ ACatAirBalloonPawn::ACatAirBalloonPawn()
 	PlaneMesh->SetStaticMesh(ConstructorStatics.PlaneMesh.Get());	// Set static mesh
 	RootComponent = PlaneMesh;
 	*/
+
+	// Must be stored to a local variable with VisibleAnywhere set in order to be editable in the BP.
+	// OK, fine.
+	MyRootComponent = CreateDefaultSubobject<UBoxComponent>(TEXT("Root0"));
+	RootComponent = MyRootComponent;
 
 	// Create a spring arm component
 	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm0"));
@@ -106,7 +112,7 @@ void ACatAirBalloonPawn::Tick(float DeltaSeconds)
 	CurrentHeight = Location.Z / 100.0f;
 	DistanceTravelled = FVector::Dist(Location, StartLocation) / 100.0f;
 
-	if (CurrentHeight <= 0.0f) {
+	if (Location.Z <= 2.0f) {
 
 		APlayerController* const Controller = Cast<APlayerController>(GEngine->GetFirstLocalPlayerController(GetWorld()));
 		if (Controller) {
@@ -142,6 +148,18 @@ void ACatAirBalloonPawn::NotifyHit(class UPrimitiveComponent* MyComp, class AAct
 	// Deflect along the surface when we collide.
 	FRotator CurrentRotation = GetActorRotation();
 	SetActorRotation(FQuat::Slerp(CurrentRotation.Quaternion(), HitNormal.ToOrientationQuat(), 0.025f));
+
+	if (Other->ActorHasTag(TEXT("Floor"))) {
+
+		// TODO: Stop collisions and let things bouce before ending game?
+
+		print(TEXT("Landed"));
+		GameOver();
+		BP_DidLandOnGround();
+	}
+
+
+
 }
 
 
@@ -170,6 +188,7 @@ void ACatAirBalloonPawn::MoveUpInput()
 		print(TEXT("Dropped Money"));
 		BP_DroppedMoney();
 	}
+	/*
 	else if (CatCount > 0) {
 		CatCount--;
 
@@ -180,7 +199,7 @@ void ACatAirBalloonPawn::MoveUpInput()
 		print(TEXT("Captain Jumped"));
 		GameOver();
 		BP_CaptainJumpedOut();
-	}
+	} */
 }
 
 void ACatAirBalloonPawn::MoveDownInput()

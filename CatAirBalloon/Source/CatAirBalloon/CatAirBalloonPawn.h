@@ -3,6 +3,8 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
+#include "Components/BoxComponent.h"
+
 #include "CatAirBalloonPawn.generated.h"
 
 UCLASS(Config=Game)
@@ -74,6 +76,9 @@ private:
 	float CurrentRollSpeed;
 
 public:
+
+	UPROPERTY(VisibleAnywhere)
+	UBoxComponent* MyRootComponent;
 
 	int HP;
 	int MaxHP;
