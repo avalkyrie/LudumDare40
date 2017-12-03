@@ -26,6 +26,8 @@ public:
 
 	// Begin AActor overrides
 	virtual void Tick(float DeltaSeconds) override;
+	virtual void BeginPlay() override;
+
 	virtual void NotifyHit(class UPrimitiveComponent* MyComp, class AActor* Other, class UPrimitiveComponent* OtherComp, bool bSelfMoved, FVector HitLocation, FVector HitNormal, FVector NormalImpulse, const FHitResult& Hit) override;
 	// End AActor overrides
 
@@ -73,10 +75,7 @@ private:
 
 public:
 
-	UPROPERTY(BlueprintReadOnly, Category = "cats")
 	int HP;
-
-	UPROPERTY(BlueprintReadOnly, Category = "cats")
 	int MaxHP;
 
 	// Heavy things
@@ -84,7 +83,25 @@ public:
 	int CatCount;
 
 	UPROPERTY(BlueprintReadOnly, Category = "cats")
+	int CatMultiplier;
+
+	UPROPERTY(BlueprintReadOnly, Category = "cats")
 	int GoldCount;
+
+	UPROPERTY(BlueprintReadOnly, Category = "cats")
+	float AirTime;
+
+	UPROPERTY(BlueprintReadOnly, Category = "cats")
+	int GoldMultiplier;
+
+	UPROPERTY(BlueprintReadOnly, Category = "cats")
+	int AirTimeMultiplier;
+
+	UPROPERTY(BlueprintReadOnly, Category = "cats")
+	int DistanceMultiplier;
+
+	UPROPERTY(BlueprintReadOnly, Category = "cats")
+	float FinalScore;
 
 	// Light things
 	float MaxHotAir;
@@ -95,6 +112,9 @@ public:
 
 	UPROPERTY(BlueprintReadOnly, Category = "cats")
 	float CurrentHeight;
+
+	UPROPERTY(BlueprintReadOnly, Category = "cats")
+	float HPPercentage;
 
 
 	UFUNCTION(BlueprintImplementableEvent)
@@ -120,6 +140,18 @@ public:
 
 	UFUNCTION(BlueprintImplementableEvent)
 	void BP_NoAirLeft();
+
+	UFUNCTION(BlueprintCallable)
+	void UpdateFinalScore();
+
+
+	// Lower corner items
+	FVector StartLocation;
+
+	FTimerHandle TimerHandle;
+	void TimerExpired();
+
+	void GameOver();
 
 
 	/** Returns SpringArm subobject **/

@@ -55,12 +55,32 @@ ACatAirBalloonPawn::ACatAirBalloonPawn()
 	// UI
 	HP = 5;
 	MaxHP = 5;
+	HPPercentage = 1.0f;
+
+	AirTime = 0.0f;
+
 	CatCount = 0;
 	GoldCount = 10000;
 	MaxHotAir = 100;
 	HotAir = MaxHotAir;
 	DistanceTravelled = 0;
 
+	CatMultiplier = -100;
+	GoldMultiplier = 100;
+	DistanceMultiplier = 100;
+	AirTimeMultiplier = 1000;
+}
+
+
+void ACatAirBalloonPawn::BeginPlay()
+{
+	StartLocation = GetActorLocation();
+
+	if (GetWorld()) {
+		GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &ACatAirBalloonPawn::TimerExpired, 9999999.0f);
+	}
+
+	Super::BeginPlay();
 }
 
 void ACatAirBalloonPawn::Tick(float DeltaSeconds)
@@ -82,19 +102,37 @@ void ACatAirBalloonPawn::Tick(float DeltaSeconds)
 	// Rotate plane
 	AddActorLocalRotation(DeltaRotation);
 
-	CurrentHeight = GetActorLocation().Z;
+	FVector Location = GetActorLocation();
+	CurrentHeight = Location.Z / 100.0f;
+	DistanceTravelled = FVector::Dist(Location, StartLocation) / 100.0f;
 
-	if (CurrentHeight <= 100.0f) {
+	if (CurrentHeight <= 0.0f) {
 
 		APlayerController* const Controller = Cast<APlayerController>(GEngine->GetFirstLocalPlayerController(GetWorld()));
 		if (Controller) {
 			print(TEXT("Landed"));
+			GameOver();
 			BP_DidLandOnGround();
 		}
 	}
 
 	// Call any parent class Tick implementation
 	Super::Tick(DeltaSeconds);
+}
+
+void ACatAirBalloonPawn::TimerExpired()
+{
+	// Hack
+}
+
+void ACatAirBalloonPawn::GameOver()
+{
+	if (GetWorld()) {
+		AirTime = GetWorld()->GetTimerManager().GetTimerElapsed(TimerHandle);
+	}
+
+	UpdateFinalScore();
+
 }
 
 void ACatAirBalloonPawn::NotifyHit(class UPrimitiveComponent* MyComp, class AActor* Other, class UPrimitiveComponent* OtherComp, bool bSelfMoved, FVector HitLocation, FVector HitNormal, FVector NormalImpulse, const FHitResult& Hit)
@@ -140,6 +178,7 @@ void ACatAirBalloonPawn::MoveUpInput()
 	}
 	else {
 		print(TEXT("Captain Jumped"));
+		GameOver();
 		BP_CaptainJumpedOut();
 	}
 }
@@ -158,6 +197,7 @@ void ACatAirBalloonPawn::MoveDownInput()
 		// No Air left, accelerate to terminal velocity
 
 		print(TEXT("No Air Left!!"));
+		GameOver();
 		BP_NoAirLeft();
 	}
 
@@ -190,4 +230,9 @@ void ACatAirBalloonPawn::MoveRightInput(float Val)
 
 	// Smoothly interpolate roll speed
 	CurrentRollSpeed = FMath::FInterpTo(CurrentRollSpeed, TargetRollSpeed, GetWorld()->GetDeltaSeconds(), 2.f);
+}
+
+void ACatAirBalloonPawn::UpdateFinalScore()
+{
+	FinalScore = DistanceTravelled * DistanceMultiplier + AirTime * AirTimeMultiplier + CatCount * CatMultiplier + GoldCount * GoldMultiplier;
 }
