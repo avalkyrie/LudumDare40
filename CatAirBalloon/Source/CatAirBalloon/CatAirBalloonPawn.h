@@ -80,8 +80,8 @@ public:
 	UPROPERTY(VisibleAnywhere)
 	UBoxComponent* MyRootComponent;
 
-	int HP;
-	int MaxHP;
+	float HP;
+	float MaxHP;
 
 	// Heavy things
 	UPROPERTY(BlueprintReadOnly, Category = "cats")
@@ -121,6 +121,9 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = "cats")
 	float HPPercentage;
 
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void BP_CollidingWithWall();
 
 	UFUNCTION(BlueprintImplementableEvent)
 	void BP_WarnTerminalVelocity();

@@ -59,8 +59,8 @@ ACatAirBalloonPawn::ACatAirBalloonPawn()
 	CurrentForwardSpeed = 1000.f;
 
 	// UI
-	HP = 5;
-	MaxHP = 5;
+	MaxHP = 100;
+	HP = MaxHP;
 	HPPercentage = 1.0f;
 
 	AirTime = 0.0f;
@@ -157,8 +157,12 @@ void ACatAirBalloonPawn::NotifyHit(class UPrimitiveComponent* MyComp, class AAct
 		GameOver();
 		BP_DidLandOnGround();
 	}
+	else {
+		HP--;
+		HPPercentage = HP / MaxHP;
 
-
+		BP_CollidingWithWall();
+	}
 
 }
 
