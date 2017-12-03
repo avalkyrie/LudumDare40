@@ -8,6 +8,7 @@
 #include "Components/InputComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Engine/World.h"
+#include "GameFramework/PlayerController.h"
 #include "Engine/StaticMesh.h"
 
 ACatAirBalloonPawn::ACatAirBalloonPawn()
@@ -81,6 +82,17 @@ void ACatAirBalloonPawn::Tick(float DeltaSeconds)
 	// Rotate plane
 	AddActorLocalRotation(DeltaRotation);
 
+	CurrentHeight = GetActorLocation().Z;
+
+	if (CurrentHeight <= 100.0f) {
+
+		APlayerController* const Controller = Cast<APlayerController>(GEngine->GetFirstLocalPlayerController(GetWorld()));
+		if (Controller) {
+			print(TEXT("Landed"));
+			BP_DidLandOnGround();
+		}
+	}
+
 	// Call any parent class Tick implementation
 	Super::Tick(DeltaSeconds);
 }
@@ -91,7 +103,7 @@ void ACatAirBalloonPawn::NotifyHit(class UPrimitiveComponent* MyComp, class AAct
 
 	// Deflect along the surface when we collide.
 	FRotator CurrentRotation = GetActorRotation();
-	//SetActorRotation(FQuat::Slerp(CurrentRotation.Quaternion(), HitNormal.ToOrientationQuat(), 0.025f));
+	SetActorRotation(FQuat::Slerp(CurrentRotation.Quaternion(), HitNormal.ToOrientationQuat(), 0.025f));
 }
 
 
@@ -116,16 +128,20 @@ void ACatAirBalloonPawn::MoveUpInput()
 		if (GoldCount < 0) {
 			GoldCount = 0;
 		}
+
+		print(TEXT("Dropped Money"));
+		BP_DroppedMoney();
 	}
 	else if (CatCount > 0) {
 		CatCount--;
+
+		print(TEXT("Dropped Cat"));
+		BP_DroppedCat();
 	}
 	else {
-		// End game with captain jump out
-		// TODO: End game
+		print(TEXT("Captain Jumped"));
+		BP_CaptainJumpedOut();
 	}
-
-	print("Move Up");
 }
 
 void ACatAirBalloonPawn::MoveDownInput()
@@ -133,11 +149,16 @@ void ACatAirBalloonPawn::MoveDownInput()
 	// Jettison Hot air to be less buoyant and go down
 	if (HotAir > 0) {
 		HotAir--;
+
+		print(TEXT("Vented Air"));
+		BP_VentAir();
 	}
 
 	if (HotAir == 0) {
 		// No Air left, accelerate to terminal velocity
-		// TODO: End game
+
+		print(TEXT("No Air Left!!"));
+		BP_NoAirLeft();
 	}
 
 	/*
@@ -150,9 +171,6 @@ void ACatAirBalloonPawn::MoveDownInput()
 	// Smoothly interpolate to target pitch speed
 	CurrentPitchSpeed = FMath::FInterpTo(CurrentPitchSpeed, TargetPitchSpeed, GetWorld()->GetDeltaSeconds(), 2.f);
 	*/
-
-	print("Move Down");
-
 }
 
 void ACatAirBalloonPawn::MoveRightInput(float Val)

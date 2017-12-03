@@ -73,25 +73,62 @@ private:
 
 public:
 
+	UPROPERTY(BlueprintReadOnly, Category = "cats")
 	int HP;
+
+	UPROPERTY(BlueprintReadOnly, Category = "cats")
 	int MaxHP;
 
 	// Heavy things
+	UPROPERTY(BlueprintReadOnly, Category = "cats")
 	int CatCount;
+
+	UPROPERTY(BlueprintReadOnly, Category = "cats")
 	int GoldCount;
 
 	// Light things
 	float MaxHotAir;
 	float HotAir;
 
+	UPROPERTY(BlueprintReadOnly, Category = "cats")
 	float DistanceTravelled;
 
+	UPROPERTY(BlueprintReadOnly, Category = "cats")
+	float CurrentHeight;
 
 
-	/** Returns PlaneMesh subobject **/
-	FORCEINLINE class UStaticMeshComponent* GetPlaneMesh() const { return PlaneMesh; }
+	UFUNCTION(BlueprintImplementableEvent)
+	void BP_WarnTerminalVelocity();
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void BP_StopWarningTerminalVelocity();
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void BP_DroppedMoney();
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void BP_DroppedCat();
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void BP_VentAir();
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void BP_DidLandOnGround();
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void BP_CaptainJumpedOut();
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void BP_NoAirLeft();
+
+
 	/** Returns SpringArm subobject **/
 	FORCEINLINE class USpringArmComponent* GetSpringArm() const { return SpringArm; }
 	/** Returns Camera subobject **/
 	FORCEINLINE class UCameraComponent* GetCamera() const { return Camera; }
+
+
+private:
+
+
 };
