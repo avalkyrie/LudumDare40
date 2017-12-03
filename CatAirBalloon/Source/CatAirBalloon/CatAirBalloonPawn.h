@@ -130,6 +130,12 @@ public:
 	void BP_DroppedCat();
 
 	UFUNCTION(BlueprintImplementableEvent)
+	void BP_PickedUpMoney();
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void BP_PickedUpCat();
+
+	UFUNCTION(BlueprintImplementableEvent)
 	void BP_VentAir();
 
 	UFUNCTION(BlueprintImplementableEvent)
