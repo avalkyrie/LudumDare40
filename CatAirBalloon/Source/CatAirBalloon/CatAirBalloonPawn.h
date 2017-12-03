@@ -159,6 +159,12 @@ public:
 	void UpdateFinalScore();
 
 
+	UPROPERTY(EditInstanceOnly, BlueprintReadWrite)
+	UStaticMeshComponent* MoneyGroupMeshComponent;
+
+	TArray<USceneComponent*> MoneyBags;
+
+
 	// Lower corner items
 	FVector StartLocation;
 
@@ -166,6 +172,8 @@ public:
 	void TimerExpired();
 
 	void GameOver();
+
+
 
 
 	/** Returns SpringArm subobject **/

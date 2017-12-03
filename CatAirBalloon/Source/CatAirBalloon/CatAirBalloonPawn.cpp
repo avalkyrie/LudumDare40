@@ -6,6 +6,8 @@
 #include "Camera/CameraComponent.h"
 #include "Components/BoxComponent.h"
 #include "Components/StaticMeshComponent.h"
+#include "Components/ChildActorComponent.h"
+
 #include "Components/InputComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Engine/World.h"
@@ -80,20 +82,21 @@ ACatAirBalloonPawn::ACatAirBalloonPawn()
 
 void ACatAirBalloonPawn::BeginPlay()
 {
+	Super::BeginPlay();
+
+
 	StartLocation = GetActorLocation();
 
 	if (GetWorld()) {
 		GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &ACatAirBalloonPawn::TimerExpired, 9999999.0f);
 	}
-
-	Super::BeginPlay();
 }
 
 void ACatAirBalloonPawn::Tick(float DeltaSeconds)
 {
 	// Descend at a calculated rate and move forward at a constant rate
-	float DescentSpeed = (MaxHotAir - HotAir) * 10.0f + CatCount * 10.0f + GoldCount * 0.1f;
-
+	float DescentSpeed = (MaxHotAir - HotAir) * .5f + CatCount * 10.0f + GoldCount * .1f;
+	
 	const FVector LocalMove = FVector(CurrentForwardSpeed * DeltaSeconds, 0.f, -DescentSpeed * DeltaSeconds);
 
 	// Move plan forwards (with sweep so we stop when we collide with things)
@@ -183,13 +186,39 @@ void ACatAirBalloonPawn::MoveUpInput()
 {
 	// Jettison baggage to be lighter and go up
 	if (GoldCount > 0) {
-		GoldCount -= 10;
+		GoldCount -= 100;
 
 		if (GoldCount < 0) {
 			GoldCount = 0;
 		}
 
 		print(TEXT("Dropped Money"));
+
+		// TODO: make this not hacky but whatever it's ludum and it's ok that we do this every time once we're out of bags
+		if (MoneyGroupMeshComponent && MoneyBags.Num() == 0) {
+			MoneyGroupMeshComponent->GetChildrenComponents(false, MoneyBags);
+		}
+
+		USceneComponent* Bag = MoneyBags.Pop();
+		if (Bag) {
+			UChildActorComponent* BagActor = Cast<UChildActorComponent>(Bag);
+			if (BagActor) {
+				BagActor->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
+
+				AActor* ChildActor = BagActor->GetChildActor();
+
+				if (ChildActor) {
+					TArray<UStaticMeshComponent*> Components;
+					ChildActor->GetComponents<UStaticMeshComponent>(Components);
+					for (UStaticMeshComponent *C : Components) {
+						C->SetSimulatePhysics(true);
+					}
+				}
+
+
+			}
+		}
+
 		BP_DroppedMoney();
 	}
 	/*
